@@ -58,6 +58,34 @@ end
 
 ### Steps to reproduce
 
+#### Perform job that references a deleted AR, and has no retry
+
+```
+objekt = Objekt.create
+objekt.destroy
+objekt.queue_no_retry_job
+```
+# No errors - logger shows an AR load call for objekts
+
+#### Perform job that throws StandardError and has retry_on StandardError, attempts: 2
+
+```
+objekt = Objekt.create
+objekt.queue_standard_error_job
+```
+# retries twice
+
+#### Perform job that references a deleted AR, and has retry_on StandardError, attempts: 2
+
+```
+objekt = Objekt.create
+objekt.destroy
+objekt.queue_retry_job
+```
+# Retries forever
+
+
+### Reproducing the issue using ActiveStorage
 ```
 blob = ActiveStorage::Blob.last
 blob.purge_later
