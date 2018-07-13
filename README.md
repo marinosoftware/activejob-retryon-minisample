@@ -54,15 +54,25 @@ class ActiveStorage::PurgeJob < ActiveStorage::BaseJob
 end
 ```
 
+# ActiveRecord GlobalID Serialization is lost for subsequent job retries
+
 ### Steps to reproduce
 
-Delete an ActiveStorage::Blob immediately after calling #purge_later on it
+```
+blob = ActiveStorage::Blob.last
+blob.purge_later
+blob.destroy
+```
+
+This deletes an ActiveStorage::Blob immediately after calling #purge_later on it
 
 ### Expected behavior
+
 ActiveRecord::RecordNotFound is raised, caught by ActiveStorage::PurgeJob.retry_on, and retried after a time.
 On second attempt, the same thing happens.  This repeats until the max retries has been reached.
 
 ### Actual behavior
+
 ActiveRecord::RecordNotFound is raised, caught by ActiveStorage::PurgeJob.retry_on, and retried after a time.
 On second attempt, an ArgumentError is raised.  This repeats until the max retries has been reached.
 
